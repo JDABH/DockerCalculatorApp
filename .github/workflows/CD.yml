@@ -34,5 +34,5 @@ jobs:
           push: true
           tags: ${{secrets.DOCKER_HUB_USERNAME}}/interactive_calculator:CalculatorTest
 
-      - name: Image digest
+      - name: Image Digest
         run: echo ${{steps.docker_build.outputs.digest}}
