@@ -14,6 +14,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Test
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
 
       - name: Login to Docker github
         uses: docker/login-action@v1
@@ -34,7 +41,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ${{secrets.DOCKER_HUB_USERNAME}}/interactive_calculator:latest
+          tags: ${{secrets.DOCKER_HUB_USERNAME}}/interactive_calculator:${{env.RELEASE_VERSION}}
 
       - name: Image digest
         run: echo ${{steps.docker_build.outputs.digest}}
