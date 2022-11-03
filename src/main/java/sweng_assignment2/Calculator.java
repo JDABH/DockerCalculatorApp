@@ -9,52 +9,45 @@ import java.util.Stack;
 public class Calculator {
 	
 	static ArrayList<String> makeArrayList(String equation) {
-		ArrayList<String> list = new ArrayList<String>();
-		String tmpStr = equation;
-		boolean exit = false;
-
-		while(!exit)
-		{
-			int[] arr = new int[3];
-			int add = tmpStr.indexOf('+');
-			arr[0] = add;
-			int sub = tmpStr.indexOf('-');
-			arr[1] = sub;
-			int mul = tmpStr.indexOf('*');
-			arr[2] = mul;
-			Arrays.sort(arr);
-			int pos = arr[0];
-
-			if(pos == -1)
-			{
-				pos = arr[1];
-				if(pos == -1)
-				{
-					pos = arr[2];
-				}
-			}
-
-			if(pos == 0)
-			{
-				String str = tmpStr.substring(0, 1);
-				list.add(str);
-				tmpStr = tmpStr.substring(1);
-			}
-			else if(pos == -1)
-			{
-				exit = true;
-				list.add(tmpStr);
-			}
-			else
-			{
-				String str = tmpStr.substring(0, pos);
-				list.add(str);
-				tmpStr = tmpStr.substring(pos);
-			}
-		}
-
-		return list;
+	    ArrayList<String> list = new ArrayList<String>();
+	    
+        String[] splitted = equation.split("");
+        ArrayList<String> charList = new ArrayList<String>(Arrays.asList(splitted));
+        
+        String currentNum = "";
+        
+        for(int i = 0; i < charList.size(); i++) 
+        {
+            String currentChar = charList.get(i);
+            
+            if(currentChar.matches("[0-9]+")) 
+            {
+                currentNum = currentNum + currentChar;
+            }
+            else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
+            {
+                if(!currentNum.equals(""))               
+                {
+                    list.add(currentNum);
+                    currentNum = "";
+                }
+                list.add(currentChar);
+            }
+            else if(currentChar.equals(" ")) {}
+            else 
+            {
+                System.err.println("You typed in an invalid expression.");
+            }
+                    
+        }
+        if(!currentNum.equals(""))               
+        {
+            list.add(currentNum);
+        }
+        return list;    
 	}
+	
+	
 
 	static int precedence(String s){
 		switch (s)
@@ -63,7 +56,10 @@ public class Calculator {
 		case "-":
 			return 1;
 		case "*":
-			return 2;
+		case "/":
+		    return 2;
+		case "^":
+		    return 3;
 		}
 		return -1;
 	}
@@ -118,6 +114,8 @@ public class Calculator {
 		case("+"):
 		case("-"):
 		case("*"):
+		case("/"):
+		case("^"):
 			return true;
 		}
 		return false;
@@ -147,6 +145,12 @@ public class Calculator {
 
 				case "*": postFix.push(op2 * op1);
 				break;
+				
+				case "/": postFix.push(op2 / op1);
+                break;
+                
+				case "^": postFix.push((int)Math.pow(op2, op1));
+                break;
 				}
 
 			}
@@ -165,7 +169,8 @@ public class Calculator {
 
 
 	private static boolean errorHandling(ArrayList<String> list) {
-		if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*"))
+		if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*")|| list.get(0).equals("/")
+		        || list.get(0).equals("^"))
 		{
 			return false;
 		}
@@ -188,7 +193,7 @@ public class Calculator {
 				else
 				{
 					String symbol = list.get(i);
-					if(!symbol.matches("[\\+\\-\\*]"))
+					if(!symbol.matches("[\\+\\-\\*\\/\\(\\)\\^]"))
 					{
 						return false;
 					}
@@ -204,7 +209,7 @@ public class Calculator {
 	}
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {  
         //Test comment
 		boolean exit = false;
 		while(!exit)
@@ -213,12 +218,15 @@ public class Calculator {
 			Scanner input = new Scanner(System.in);
 			String equation = input.nextLine();
 			ArrayList<String> arr = makeArrayList(equation);
+			System.out.println(arr.toString());
 
-			if(errorHandling(arr))
+			//if(errorHandling(arr))
+			if(true)
 			{
 				ArrayList<String> postExpression = infixToPostFix(arr);
+				System.out.println(postExpression.toString());
 				System.out.println("The answer is " + evaluatePostfix(postExpression));
-				exit = true;
+			    exit = true;
 				input.close();
 			}
 			else
@@ -226,7 +234,6 @@ public class Calculator {
 				printErrorMessage();
 			}
 		}
-
 
 	}
 
