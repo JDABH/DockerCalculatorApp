@@ -1,12 +1,16 @@
 package sweng_assignment2;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
+//import java.lang.*;
 
 
 public class Calculator {
+	
+	public static final float eValue= 2.7182881828f;
 	
 	static ArrayList<String> makeArrayList(String equation) {
 	    ArrayList<String> list = new ArrayList<String>();
@@ -18,12 +22,25 @@ public class Calculator {
         
         for(int i = 0; i < charList.size(); i++) 
         {
-            String currentChar = charList.get(i);
+	    String currentChar;
+	    if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
+	    	currentChar = "exp";
+		i+= 2;
+	    }
+	    else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
+		currentChar = "ln";
+		i+= 1;
+	    }
+	    else{
+           	 currentChar = charList.get(i);
             
             if(currentChar.matches("[0-9]+")) 
             {
                 currentNum = currentNum + currentChar;
             }
+	    else if(currentChar.equals(".")){
+		    currentNum += currentChar;
+	    }
             else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
             {
                 if(!currentNum.equals(""))               
@@ -59,6 +76,8 @@ public class Calculator {
 		case "/":
 		    return 2;
 		case "^":
+		case "exp":
+		case "ln":
 		    return 3;
 		}
 		return -1;
@@ -116,14 +135,16 @@ public class Calculator {
 		case("*"):
 		case("/"):
 		case("^"):
+		case("exp"):
+		case("ln"):
 			return true;
 		}
 		return false;
 	}
 
-	static int evaluatePostfix(ArrayList<String> postExpression)
+	static float evaluatePostfix(ArrayList<String> postExpression)
 	{
-		Stack<Integer> postFix = new Stack<>();    // Create postfix stack
+		Stack<Float> postFix = new Stack<>();    // Create postfix stack
 		int n = postExpression.size();
 
 		for(int i = 0; i < n; i++)
@@ -131,8 +152,14 @@ public class Calculator {
 			if(isOperator(postExpression.get(i)))
 			{
 				// pop top 2 operands.
-				int op1 = postFix.pop();
-				int op2 = postFix.pop();
+				Float op1 = postFix.pop();
+				Float op2;
+				if(postExpression.get(i) == "exp" || postExpression.get(i) == "ln"){
+					op2 = eValue;
+				}
+				else {
+					op2 = postFix.pop();	
+				}
 
 				// evaluate in reverse order i.e. op2 operator op1.
 				switch(postExpression.get(i))
@@ -149,8 +176,14 @@ public class Calculator {
 				case "/": postFix.push(op2 / op1);
                 break;
                 
-				case "^": postFix.push((int)Math.pow(op2, op1));
+				case "^": postFix.push((float)Math.pow(op2, op1));
                 break;
+						
+				case "exp": postFix.push((float)Math.pow(op2, op1));
+				break;
+						
+				case "ln": postFix.push((float)Math.log(op1));
+				break;
 				}
 
 			}
@@ -158,13 +191,15 @@ public class Calculator {
 			else
 			{
 				// convert to integer
-				int operand =  Integer.valueOf(postExpression.get(i));
+				Float operand =  Float.valueOf(postExpression.get(i));
 				postFix.push(operand);
 			}
 		}
+		DecimalFormat df = new DecimalFormat("#.000");
+		
 
 		// Stack at End will contain result.
-		return postFix.pop();
+		return Float.valueOf(df.format(postFix.pop()));
 	}
 
 
@@ -193,7 +228,7 @@ public class Calculator {
 				else
 				{
 					String symbol = list.get(i);
-					if(!symbol.matches("[\\+\\-\\*\\/\\(\\)\\^]"))
+					if(!symbol.matches("[\\+\\-\\*\\/\\(\\)\\^\\exp\\ln]"))
 					{
 						return false;
 					}
