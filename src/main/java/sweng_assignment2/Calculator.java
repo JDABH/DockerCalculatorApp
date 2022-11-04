@@ -39,9 +39,9 @@ public class Calculator {
             {
                 currentNum = currentNum + currentChar;
             }
-			else if(currentChar.equals(".")){
-				currentNum += currentChar;
-			}
+	    else if(currentChar.equals(".")){
+	   	 currentNum += currentChar;
+	    }
             else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
             {
                 if(!currentNum.equals(""))               
