@@ -1,5 +1,6 @@
 package sweng_assignment2;
 
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +10,7 @@ import java.util.Stack;
 
 
 public class Calculator {
-	
+
 	public static final float eValue= 2.7182881828f;
 	
 	static ArrayList<String> makeArrayList(String equation) {
@@ -22,25 +23,25 @@ public class Calculator {
         
         for(int i = 0; i < charList.size(); i++) 
         {
-	    String currentChar;
-	    if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
-	    	currentChar = "exp";
-		i+= 2;
-	    }
-	    else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
-		currentChar = "ln";
-		i+= 1;
-	    }
-	    else{
-           	 currentChar = charList.get(i);
-            
+			String currentChar;
+			if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
+				currentChar = "exp";
+				i+= 2;
+			}
+			else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
+				currentChar = "ln";
+				i+= 1;
+			}
+			else{
+           	 	currentChar = charList.get(i);
+			}
             if(currentChar.matches("[0-9]+")) 
             {
                 currentNum = currentNum + currentChar;
             }
-	    else if(currentChar.equals(".")){
-		    currentNum += currentChar;
-	    }
+			else if(currentChar.equals(".")){
+				currentNum += currentChar;
+			}
             else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
             {
                 if(!currentNum.equals(""))               
@@ -146,6 +147,7 @@ public class Calculator {
 	{
 		Stack<Float> postFix = new Stack<>();    // Create postfix stack
 		int n = postExpression.size();
+		
 
 		for(int i = 0; i < n; i++)
 		{
@@ -157,8 +159,8 @@ public class Calculator {
 				if(postExpression.get(i) == "exp" || postExpression.get(i) == "ln"){
 					op2 = eValue;
 				}
-				else {
-					op2 = postFix.pop();	
+				else{
+					op2 = postFix.pop();
 				}
 
 				// evaluate in reverse order i.e. op2 operator op1.
@@ -178,10 +180,10 @@ public class Calculator {
                 
 				case "^": postFix.push((float)Math.pow(op2, op1));
                 break;
-						
-				case "exp": postFix.push((float)Math.pow(op2, op1));
+
+				case "exp": postFix.push((float)Math.pow(op2, op1)); //2.7182881828
 				break;
-						
+
 				case "ln": postFix.push((float)Math.log(op1));
 				break;
 				}
@@ -195,12 +197,15 @@ public class Calculator {
 				postFix.push(operand);
 			}
 		}
-		DecimalFormat df = new DecimalFormat("#.000");
-		
 
 		// Stack at End will contain result.
+		DecimalFormat df = new DecimalFormat("#.000");
+
 		return Float.valueOf(df.format(postFix.pop()));
 	}
+
+
+
 
 
 	private static boolean errorHandling(ArrayList<String> list) {
@@ -269,7 +274,6 @@ public class Calculator {
 				printErrorMessage();
 			}
 		}
-
 	}
 
 }
