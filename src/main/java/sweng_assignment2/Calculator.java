@@ -1,60 +1,73 @@
 package sweng_assignment2;
 
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
+//import java.lang.*;
 
 
 public class Calculator {
-	
+
+	public static final float eValue= 2.7182881828f;
+
 	static ArrayList<String> makeArrayList(String equation) {
-		ArrayList<String> list = new ArrayList<String>();
-		String tmpStr = equation;
-		boolean exit = false;
+	    ArrayList<String> list = new ArrayList<String>();
 
-		while(!exit)
-		{
-			int[] arr = new int[3];
-			int add = tmpStr.indexOf('+');
-			arr[0] = add;
-			int sub = tmpStr.indexOf('-');
-			arr[1] = sub;
-			int mul = tmpStr.indexOf('*');
-			arr[2] = mul;
-			Arrays.sort(arr);
-			int pos = arr[0];
+        String[] splitted = equation.split("");
+        ArrayList<String> charList = new ArrayList<String>(Arrays.asList(splitted));
 
-			if(pos == -1)
-			{
-				pos = arr[1];
-				if(pos == -1)
-				{
-					pos = arr[2];
-				}
-			}
+        String currentNum = "";
 
-			if(pos == 0)
-			{
-				String str = tmpStr.substring(0, 1);
-				list.add(str);
-				tmpStr = tmpStr.substring(1);
-			}
-			else if(pos == -1)
-			{
-				exit = true;
-				list.add(tmpStr);
-			}
-			else
-			{
-				String str = tmpStr.substring(0, pos);
-				list.add(str);
-				tmpStr = tmpStr.substring(pos);
-			}
-		}
+        for(int i = 0; i < charList.size(); i++)
+        {
+					String currentChar;
+					if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
+						currentChar = "exp";
+						i+= 2;
+					}
+					else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
+						currentChar = "ln";
+						i+= 1;
+					}
+					else{
+      			currentChar = charList.get(i);
+					}
+					if(currentChar.matches("[0-9]+"))
+      		{
+      			currentNum = currentNum + currentChar;
+      		}
+	    		else if(currentChar.equals(".")){
+	   	 			currentNum += currentChar;
+	    		}
+          else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
+          {
+            if(!currentNum.equals(""))
+            {
+              list.add(currentNum);
+              currentNum = "";
+            }
+              list.add(currentChar);
+          }
+          else if(currentChar.equals(" ")) {}
+          else
+          {
+            System.err.println("You typed in an invalid expression.");
+						ArrayList<String> emptyList = new ArrayList<String>();
+						return emptyList;
+          }
 
-		return list;
+        }
+        if(!currentNum.equals(""))
+        {
+            list.add(currentNum);
+        }
+        return list;
 	}
+
+
 
 	static int precedence(String s){
 		switch (s)
@@ -63,7 +76,12 @@ public class Calculator {
 		case "-":
 			return 1;
 		case "*":
-			return 2;
+		case "/":
+		    return 2;
+		case "^":
+		case "exp":
+		case "ln":
+		    return 3;
 		}
 		return -1;
 	}
@@ -72,7 +90,7 @@ public class Calculator {
 
 		ArrayList<String> result = new ArrayList<String>();
 		Stack<String> stack = new Stack<>();
-		for (int i = 0; i < list.size() ; i++) 
+		for (int i = 0; i < list.size() ; i++)
 		{
 			String s = list.get(i);
 
@@ -99,11 +117,11 @@ public class Calculator {
 			}
 			else
 			{
-				//character is neither operator nor ( 
+				//character is neither operator nor (
 				result.add(s);
 			}
 		}
-		for (int i = 0; i <= stack.size() ; i++) 
+		for (int i = 0; i <= stack.size() ; i++)
 		{
 			result.add(stack.pop());
 		}
@@ -118,54 +136,92 @@ public class Calculator {
 		case("+"):
 		case("-"):
 		case("*"):
+		case("/"):
+		case("^"):
+		case("exp"):
+		case("ln"):
 			return true;
 		}
 		return false;
 	}
 
-	static int evaluatePostfix(ArrayList<String> postExpression)
+	static String evaluatePostfix(ArrayList<String> postExpression) throws Exception
 	{
-		Stack<Integer> postFix = new Stack<>();    // Create postfix stack
-		int n = postExpression.size();
+		try {
+			Stack<Float> postFix = new Stack<>();    // Create postfix stack
+			int n = postExpression.size();
 
-		for(int i = 0; i < n; i++)
-		{
-			if(isOperator(postExpression.get(i)))
+
+			for(int i = 0; i < n; i++)
 			{
-				// pop top 2 operands.
-				int op1 = postFix.pop();
-				int op2 = postFix.pop();
-
-				// evaluate in reverse order i.e. op2 operator op1.
-				switch(postExpression.get(i))
+				if(isOperator(postExpression.get(i)))
 				{
-				case "+": postFix.push(op2 + op1);
-				break;
+					// pop top 2 operands.
+					Float op1 = postFix.pop();
+					Float op2;
+					if(postExpression.get(i) == "exp" || postExpression.get(i) == "ln"){
+						op2 = eValue;
+					}
+					else{
+						op2 = postFix.pop();
+					}
 
-				case "-": postFix.push(op2 - op1);
-				break;
+					// evaluate in reverse order i.e. op2 operator op1.
+					switch(postExpression.get(i))
+					{
+						case "+": postFix.push(op2 + op1);
+											break;
 
-				case "*": postFix.push(op2 * op1);
-				break;
+						case "-": postFix.push(op2 - op1);
+											break;
+
+						case "*": postFix.push(op2 * op1);
+											break;
+
+						case "/": postFix.push(op2 / op1);
+                			break;
+
+						case "^": postFix.push((float)Math.pow(op2, op1));
+                			break;
+
+						case "exp": postFix.push((float)Math.pow(op2, op1)); //2.7182881828
+											break;
+
+						case "ln": postFix.push((float)Math.log(op1));
+											 break;
+					}
+
 				}
+				// Current Char is Operand simple push into stack
+				else
+				{
+					// convert to integer
+					Float operand =  Float.valueOf(postExpression.get(i));
+					postFix.push(operand);
+				}
+			}
 
-			}
-			// Current Char is Operand simple push into stack
-			else
-			{
-				// convert to integer
-				int operand =  Integer.valueOf(postExpression.get(i));
-				postFix.push(operand);
-			}
+			// Stack at End will contain result.
+			DecimalFormat df = new DecimalFormat("#.000");
+
+			Float result = Float.valueOf(df.format(postFix.pop()));
+			return result.toString();
 		}
-
-		// Stack at End will contain result.
-		return postFix.pop();
+		catch(Exception e) {
+			return "invalid";
+		}
 	}
 
 
+
+
+
 	private static boolean errorHandling(ArrayList<String> list) {
-		if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*"))
+		if(list.size() < 2) {
+			return false;
+		}
+		else if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*")|| list.get(0).equals("/")
+		        || list.get(0).equals("^"))
 		{
 			return false;
 		}
@@ -175,23 +231,25 @@ public class Calculator {
 		}
 		else
 		{
+			boolean result = true;
 			for(int i = 0; i < list.size(); i++)
 			{
-				if(i % 2 == 0)
-				{
-					String num = list.get(i);
-					if(!num.matches("[0-9]+"))
-					{
-						return false;
-					}
-				}
-				else
-				{
+
 					String symbol = list.get(i);
-					if(!symbol.matches("[\\+\\-\\*]"))
+					if(!symbol.matches("([0-9]+)|exp|ln|\\*|\\+|\\/|\\(|\\)|\\^|\\.|\\-"))
 					{
-						return false;
+						result = false;
 					}
+					if(symbol.matches("/^\\d\\.?\\d$/")) {
+						result = true;
+					}
+					else {
+						result = true;
+					}
+
+				if(!result){
+					System.out.println(list.get(i));
+					return result;
 				}
 			}
 			return true;
@@ -204,7 +262,7 @@ public class Calculator {
 	}
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
         //Test comment
 		boolean exit = false;
 		while(!exit)
@@ -213,21 +271,36 @@ public class Calculator {
 			Scanner input = new Scanner(System.in);
 			String equation = input.nextLine();
 			ArrayList<String> arr = makeArrayList(equation);
+			System.out.println(arr.toString());
 
 			if(errorHandling(arr))
+			//if(true)
+			//if(arr.size()!=0)
 			{
-				ArrayList<String> postExpression = infixToPostFix(arr);
-				System.out.println("The answer is " + evaluatePostfix(postExpression));
-				exit = true;
-				input.close();
+				try {
+					ArrayList<String> postExpression = infixToPostFix(arr);
+					System.out.println(postExpression.toString());
+					String result = evaluatePostfix(postExpression);
+					if (result != "invalid"){
+						System.out.println("The answer is " + evaluatePostfix(postExpression));
+					}
+					else {
+						printErrorMessage();
+					}
+			    exit = true;
+					input.close();
+				}
+				catch(Exception e){
+					break;
+				}
 			}
 			else
 			{
 				printErrorMessage();
+				exit = true;
+				input.close();
 			}
 		}
-
-
 	}
 
 }

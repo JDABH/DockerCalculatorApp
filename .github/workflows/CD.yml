@@ -43,5 +43,5 @@ jobs:
           push: true
           tags: ${{secrets.DOCKER_HUB_USERNAME}}/interactive_calculator:${{env.RELEASE_VERSION}}
 
-      - name: Image digest
+      - name: Image Digest
         run: echo ${{steps.docker_build.outputs.digest}}
