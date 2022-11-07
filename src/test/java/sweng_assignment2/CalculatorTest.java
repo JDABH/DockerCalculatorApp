@@ -10,20 +10,20 @@ import org.junit.Test;
 public class CalculatorTest {
 
 	@Test
-	public void testInfixToPostFix() {
+	public void testInfixToPostFix() throws Exception{
 		String equation = "14*3-7*35+22-56+100";
 		ArrayList<String> list = Calculator.makeArrayList(equation);
 		String[] expectedResult = {"14", "3", "*", "7", "35", "*", "-", "22", "+", "56", "-", "100", "+"};
 		assertEquals(Arrays.toString(expectedResult), Calculator.infixToPostFix(list).toString());
 	}
-	
+
 	@Test
-	public void testEvaluatePostfix() {
+	public void testEvaluatePostfix() throws Exception {
 		String equation = "14*3-7*35+22-56+100";
 		ArrayList<String> list = Calculator.makeArrayList(equation);
-		int expectedResult = -137; 
+		int expectedResult = -137;
 		assertEquals(expectedResult, Calculator.evaluatePostfix(Calculator.infixToPostFix(list)));
 	}
-	
+
 
 }
