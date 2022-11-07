@@ -12,60 +12,62 @@ import java.util.Stack;
 public class Calculator {
 
 	public static final float eValue= 2.7182881828f;
-	
+
 	static ArrayList<String> makeArrayList(String equation) {
 	    ArrayList<String> list = new ArrayList<String>();
-	    
+
         String[] splitted = equation.split("");
         ArrayList<String> charList = new ArrayList<String>(Arrays.asList(splitted));
-        
+
         String currentNum = "";
-        
-        for(int i = 0; i < charList.size(); i++) 
+
+        for(int i = 0; i < charList.size(); i++)
         {
-			String currentChar;
-			if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
-				currentChar = "exp";
-				i+= 2;
-			}
-			else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
-				currentChar = "ln";
-				i+= 1;
-			}
-			else{
-           	 	currentChar = charList.get(i);
-			}
-            if(currentChar.matches("[0-9]+")) 
+					String currentChar;
+					if(charList.get(i).equals("e") && charList.get(i+1).equals("x") && charList.get(i+2).equals("p")){
+						currentChar = "exp";
+						i+= 2;
+					}
+					else if(charList.get(i).equals("l") && charList.get(i+1).equals("n")){
+						currentChar = "ln";
+						i+= 1;
+					}
+					else{
+      			currentChar = charList.get(i);
+					}
+					if(currentChar.matches("[0-9]+"))
+      		{
+      			currentNum = currentNum + currentChar;
+      		}
+	    		else if(currentChar.equals(".")){
+	   	 			currentNum += currentChar;
+	    		}
+          else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
+          {
+            if(!currentNum.equals(""))
             {
-                currentNum = currentNum + currentChar;
+              list.add(currentNum);
+              currentNum = "";
             }
-	    else if(currentChar.equals(".")){
-	   	 currentNum += currentChar;
-	    }
-            else if(precedence(currentChar) != -1 || currentChar.equals(")") || currentChar.equals("("))
-            {
-                if(!currentNum.equals(""))               
-                {
-                    list.add(currentNum);
-                    currentNum = "";
-                }
-                list.add(currentChar);
-            }
-            else if(currentChar.equals(" ")) {}
-            else 
-            {
-                System.err.println("You typed in an invalid expression.");
-            }
-                    
+              list.add(currentChar);
+          }
+          else if(currentChar.equals(" ")) {}
+          else
+          {
+            System.err.println("You typed in an invalid expression.");
+						ArrayList<String> emptyList = new ArrayList<String>();
+						return emptyList;
+          }
+
         }
-        if(!currentNum.equals(""))               
+        if(!currentNum.equals(""))
         {
             list.add(currentNum);
         }
-        return list;    
+        return list;
 	}
-	
-	
+
+
 
 	static int precedence(String s){
 		switch (s)
@@ -88,7 +90,7 @@ public class Calculator {
 
 		ArrayList<String> result = new ArrayList<String>();
 		Stack<String> stack = new Stack<>();
-		for (int i = 0; i < list.size() ; i++) 
+		for (int i = 0; i < list.size() ; i++)
 		{
 			String s = list.get(i);
 
@@ -115,11 +117,11 @@ public class Calculator {
 			}
 			else
 			{
-				//character is neither operator nor ( 
+				//character is neither operator nor (
 				result.add(s);
 			}
 		}
-		for (int i = 0; i <= stack.size() ; i++) 
+		for (int i = 0; i <= stack.size() ; i++)
 		{
 			result.add(stack.pop());
 		}
@@ -143,65 +145,71 @@ public class Calculator {
 		return false;
 	}
 
-	static float evaluatePostfix(ArrayList<String> postExpression)
+	static String evaluatePostfix(ArrayList<String> postExpression) throws Exception
 	{
-		Stack<Float> postFix = new Stack<>();    // Create postfix stack
-		int n = postExpression.size();
-		
+		try {
+			Stack<Float> postFix = new Stack<>();    // Create postfix stack
+			int n = postExpression.size();
 
-		for(int i = 0; i < n; i++)
-		{
-			if(isOperator(postExpression.get(i)))
+
+			for(int i = 0; i < n; i++)
 			{
-				// pop top 2 operands.
-				Float op1 = postFix.pop();
-				Float op2;
-				if(postExpression.get(i) == "exp" || postExpression.get(i) == "ln"){
-					op2 = eValue;
-				}
-				else{
-					op2 = postFix.pop();
-				}
-
-				// evaluate in reverse order i.e. op2 operator op1.
-				switch(postExpression.get(i))
+				if(isOperator(postExpression.get(i)))
 				{
-				case "+": postFix.push(op2 + op1);
-				break;
+					// pop top 2 operands.
+					Float op1 = postFix.pop();
+					Float op2;
+					if(postExpression.get(i) == "exp" || postExpression.get(i) == "ln"){
+						op2 = eValue;
+					}
+					else{
+						op2 = postFix.pop();
+					}
 
-				case "-": postFix.push(op2 - op1);
-				break;
+					// evaluate in reverse order i.e. op2 operator op1.
+					switch(postExpression.get(i))
+					{
+						case "+": postFix.push(op2 + op1);
+											break;
 
-				case "*": postFix.push(op2 * op1);
-				break;
-				
-				case "/": postFix.push(op2 / op1);
-                break;
-                
-				case "^": postFix.push((float)Math.pow(op2, op1));
-                break;
+						case "-": postFix.push(op2 - op1);
+											break;
 
-				case "exp": postFix.push((float)Math.pow(op2, op1)); //2.7182881828
-				break;
+						case "*": postFix.push(op2 * op1);
+											break;
 
-				case "ln": postFix.push((float)Math.log(op1));
-				break;
+						case "/": postFix.push(op2 / op1);
+                			break;
+
+						case "^": postFix.push((float)Math.pow(op2, op1));
+                			break;
+
+						case "exp": postFix.push((float)Math.pow(op2, op1)); //2.7182881828
+											break;
+
+						case "ln": postFix.push((float)Math.log(op1));
+											 break;
+					}
+
 				}
+				// Current Char is Operand simple push into stack
+				else
+				{
+					// convert to integer
+					Float operand =  Float.valueOf(postExpression.get(i));
+					postFix.push(operand);
+				}
+			}
 
-			}
-			// Current Char is Operand simple push into stack
-			else
-			{
-				// convert to integer
-				Float operand =  Float.valueOf(postExpression.get(i));
-				postFix.push(operand);
-			}
+			// Stack at End will contain result.
+			DecimalFormat df = new DecimalFormat("#.000");
+
+			Float result = Float.valueOf(df.format(postFix.pop()));
+			return result.toString();
 		}
-
-		// Stack at End will contain result.
-		DecimalFormat df = new DecimalFormat("#.000");
-
-		return Float.valueOf(df.format(postFix.pop()));
+		catch(Exception e) {
+			return "invalid";
+		}
 	}
 
 
@@ -209,7 +217,10 @@ public class Calculator {
 
 
 	private static boolean errorHandling(ArrayList<String> list) {
-		if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*")|| list.get(0).equals("/")
+		if(list.size() < 2) {
+			return false;
+		}
+		else if(list.get(0).equals("+") || list.get(0).equals("-") || list.get(0).equals("*")|| list.get(0).equals("/")
 		        || list.get(0).equals("^"))
 		{
 			return false;
@@ -220,23 +231,25 @@ public class Calculator {
 		}
 		else
 		{
+			boolean result = true;
 			for(int i = 0; i < list.size(); i++)
 			{
-				if(i % 2 == 0)
-				{
-					String num = list.get(i);
-					if(!num.matches("[0-9]+"))
-					{
-						return false;
-					}
-				}
-				else
-				{
+
 					String symbol = list.get(i);
-					if(!symbol.matches("[\\+\\-\\*\\/\\(\\)\\^\\exp\\ln]"))
+					if(!symbol.matches("([0-9]+)|exp|ln|\\*|\\+|\\/|\\(|\\)|\\^|\\.|\\-"))
 					{
-						return false;
+						result = false;
 					}
+					if(symbol.matches("/^\\d\\.?\\d$/")) {
+						result = true;
+					}
+					else {
+						result = true;
+					}
+
+				if(!result){
+					System.out.println(list.get(i));
+					return result;
 				}
 			}
 			return true;
@@ -249,7 +262,7 @@ public class Calculator {
 	}
 
 
-	public static void main(String[] args) {  
+	public static void main(String[] args) throws Exception {
         //Test comment
 		boolean exit = false;
 		while(!exit)
@@ -260,18 +273,32 @@ public class Calculator {
 			ArrayList<String> arr = makeArrayList(equation);
 			System.out.println(arr.toString());
 
-			//if(errorHandling(arr))
-			if(true)
+			if(errorHandling(arr))
+			//if(true)
+			//if(arr.size()!=0)
 			{
-				ArrayList<String> postExpression = infixToPostFix(arr);
-				System.out.println(postExpression.toString());
-				System.out.println("The answer is " + evaluatePostfix(postExpression));
+				try {
+					ArrayList<String> postExpression = infixToPostFix(arr);
+					System.out.println(postExpression.toString());
+					String result = evaluatePostfix(postExpression);
+					if (result != "invalid"){
+						System.out.println("The answer is " + evaluatePostfix(postExpression));
+					}
+					else {
+						printErrorMessage();
+					}
 			    exit = true;
-				input.close();
+					input.close();
+				}
+				catch(Exception e){
+					break;
+				}
 			}
 			else
 			{
 				printErrorMessage();
+				exit = true;
+				input.close();
 			}
 		}
 	}
