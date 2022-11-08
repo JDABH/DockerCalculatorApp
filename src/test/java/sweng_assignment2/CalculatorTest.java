@@ -1,4 +1,4 @@
-package sweng_assignment2;
+package sweng_assignment2.com.spring.javawebserver.webserver;
 
 import static org.junit.Assert.*;
 
